@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Password Generator</title>
+<style>
+  body {
+    background-color: #222;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  input[type=number], input[type=email], input[type=text] {
+    padding: 8px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #eee;
+    border-radius: 4px;
+  }
+  button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #555;
+    color: #eee;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background-color: #777;
+  }
+  #passwordDisplay {
+    margin-top: 20px;
+    font-family: monospace;
+    font-size: 1.2em;
+    background-color: #111;
+    padding: 10px;
+    border-radius: 4px;
+    word-break: break-all;
+  }
+  #history {
+    margin-top: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #111;
+    padding: 10px;
+    border-radius: 4px;
+  }
+  .history-item {
+    border-bottom: 1px solid #555;
+    padding: 5px 0;
+  }
+  #notes {
+    margin-top: 20px;
+  }
+  #notes textarea {
+    width: 100%;
+    height: 80px;
+    background-color: #111;
+    color: #eee;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 8px;
+  }
+</style>
+</head>
+<body>
+<h1>Password Generator</h1>
+<div class="container">
+  <div class="controls">
+    <label for="length">Password Length:</label>
+    <input type="number" id="length" min="4" max="64" value="12"/>
+    <button onclick="generatePassword()">Generate Password</button>
+    <button onclick="copyPassword()">Copy</button>
+    <button onclick="sendEmail()">Send via Email</button>
+  </div>
+  <div id="passwordDisplay">Your password will appear here</div>
+  <div id="historyContainer">
+    <h3>History</h3>
+    <div id="history"></div>
+  </div>
+  <div id="notes">
+    <h3>Notes</h3>
+    <textarea id="notesArea" placeholder="Add your notes here..."></textarea>
+    <button onclick="saveNotes()">Save Notes</button>
+  </div>
+</div>
+
+<script>
+  let currentPassword = "";
+  let passwordHistory = [];
+  let notes = "";
+
+  function generatePassword() {
+    const length = parseInt(document.getElementById('length').value) || 12;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    currentPassword = password;
+    document.getElementById('passwordDisplay').textContent = password;
+    addToHistory(password);
+  }
+
+  function copyPassword() {
+    if (currentPassword) {
+      navigator.clipboard.writeText(currentPassword).then(() => {
+        alert("Password copied to clipboard");
+      });
+    } else {
+      alert("Generate a password first");
+    }
+  }
+
+  function addToHistory(password) {
+    passwordHistory.push(password);
+    updateHistory();
+  }
+
+  function updateHistory() {
+    const historyDiv = document.getElementById('history');
+    historyDiv.innerHTML = "";
+    for (let i = 0; i < passwordHistory.length; i++) {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.textContent = passwordHistory[i];
+      // Add copy on click
+      item.onclick = () => {
+        navigator.clipboard.writeText(passwordHistory[i]);
+        alert("Password copied to clipboard");
+      };
+      historyDiv.appendChild(item);
+    }
+  }
+
+  function sendEmail() {
+    const email = prompt("Enter email address to send password:");
+    if (email && currentPassword) {
+      // For demo, we just open mail client
+      window.location.href = `mailto:${email}?subject=Your%20Generated%20Password&body=${encodeURIComponent(currentPassword)}`;
+    } else if (!currentPassword) {
+      alert("Generate a password first");
+    } else {
+      alert("Please enter an email");
+    }
+  }
+
+  function saveNotes() {
+    notes = document.getElementById('notesArea').value;
+    alert("Notes saved");
+  }
+</script>
+</body>
+</html>
